@@ -1,11 +1,31 @@
+require('dotenv').config()
+
 const express = require('express')
 const app = express()
+const mongoose = require('mongoose')
 const morgan = require('morgan')
+
+// 🔥 MongoDB connection
+mongoose.set('strictQuery', false)
+
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log('connected to MongoDB')
+  })
+  .catch(error => {
+    console.log('error connecting to MongoDB:', error.message)
+  })
+
+// 🔥 Middleware
+app.use(express.json())
+
 morgan.token('data', (request) => {
   return JSON.stringify(request.body)
 })
+
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'))
-app.use(express.json())
+
+// 🔥 TEMP: still using array (we'll replace later)
 let persons = [
   { id: 1, name: 'Arto Hellas', number: '040-123456' },
   { id: 2, name: 'Ada Lovelace', number: '39-44-5323523' },
@@ -13,13 +33,13 @@ let persons = [
   { id: 4, name: 'Mary Poppendieck', number: '39-23-6423122' }
 ]
 
+// 🔥 Routes
+
 app.get('/api/persons', (request, response) => {
   response.json(persons)
 })
 
 app.get('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  app.get('/api/persons/:id', (request, response, next) => {
   const id = Number(request.params.id)
 
   if (isNaN(id)) {
@@ -34,7 +54,7 @@ app.get('/api/persons/:id', (request, response) => {
     response.status(404).end()
   }
 })
-})
+
 app.delete('/api/persons/:id', (request, response) => {
   const id = Number(request.params.id)
 
@@ -48,15 +68,14 @@ app.delete('/api/persons/:id', (request, response) => {
 
   response.status(204).end()
 })
+
 app.post('/api/persons', (request, response) => {
   const body = request.body
 
- 
   if (!body.name) {
     return response.status(400).json({ error: 'name missing' })
   }
 
- 
   if (!body.number) {
     return response.status(400).json({ error: 'number missing' })
   }
@@ -76,15 +95,6 @@ app.post('/api/persons', (request, response) => {
   persons = persons.concat(newPerson)
 
   response.json(newPerson)
-})
-app.get('/info', (request, response) => {
-  const total = persons.length
-  const date = new Date()
-
-  response.send(`
-    <p>Phonebook has info for ${total} people</p>
-    <p>${date}</p>
-  `)
 })
 
 app.put('/api/persons/:id', (request, response) => {
@@ -107,11 +117,24 @@ app.put('/api/persons/:id', (request, response) => {
   response.json(updatedPerson)
 })
 
+app.get('/info', (request, response) => {
+  const total = persons.length
+  const date = new Date()
+
+  response.send(`
+    <p>Phonebook has info for ${total} people</p>
+    <p>${date}</p>
+  `)
+})
+
+// 🔥 Unknown endpoint
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
 
 app.use(unknownEndpoint)
+
+// 🔥 Error handler
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
 
@@ -123,7 +146,9 @@ const errorHandler = (error, request, response, next) => {
 }
 
 app.use(errorHandler)
-const PORT = 3002
+
+// 🔥 Start server
+const PORT = process.env.PORT || 3002
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
