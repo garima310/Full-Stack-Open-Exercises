@@ -9,12 +9,22 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
+  
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs(blogs)
-    )
+    blogService.getAll().then(blogs => setBlogs(blogs))
   }, [])
 
+ 
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      blogService.setToken(user.token)
+    }
+  }, [])
+
+ 
   const handleLogin = async (event) => {
     event.preventDefault()
 
@@ -24,17 +34,28 @@ const App = () => {
         password
       })
 
-      setUser(user)
-      setUsername('')
-      setPassword('')
+      window.localStorage.setItem(
+        'loggedBlogappUser',
+        JSON.stringify(user)
+      )
 
       blogService.setToken(user.token)
-    } catch (exception) {
+      setUser(user)
+
+      setUsername('')
+      setPassword('')
+    } catch (error) {
       console.log('wrong username or password')
     }
   }
 
-  // 🔥 IF NOT LOGGED IN
+ 
+  const handleLogout = () => {
+    window.localStorage.removeItem('loggedBlogappUser')
+    setUser(null)
+  }
+
+  
   if (user === null) {
     return (
       <div>
@@ -46,7 +67,6 @@ const App = () => {
             <input
               type="text"
               value={username}
-              name="Username"
               onChange={({ target }) => setUsername(target.value)}
             />
           </div>
@@ -56,7 +76,6 @@ const App = () => {
             <input
               type="password"
               value={password}
-              name="Password"
               onChange={({ target }) => setPassword(target.value)}
             />
           </div>
@@ -67,18 +86,20 @@ const App = () => {
     )
   }
 
-  // 🔥 IF LOGGED IN
   return (
     <div>
       <h2>blogs</h2>
 
-      <p>{user.name} logged in</p>
+      <p>
+        {user.name} logged in
+        <button onClick={handleLogout}>logout</button>
+      </p>
 
-      {blogs.map(blog =>
+      {blogs.map(blog => (
         <div key={blog.id}>
           {blog.title} {blog.author}
         </div>
-      )}
+      ))}
     </div>
   )
 }
