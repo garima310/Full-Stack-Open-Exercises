@@ -13,4 +13,25 @@ const blogReducer = (state, action) => {
   }
 }
 
+export const setBlogs = (blogs) => {
+  return {
+    type: 'SET_BLOGS',
+    payload: blogs
+  }
+}
+
+export const addBlogAction = (blog) => {
+  return {
+    type: 'ADD_BLOG',
+    payload: blog
+  }
+}
+
+export const updateBlogAction = (blog) => {
+  return {
+    type: 'UPDATE_BLOG',
+    payload: blog
+  }
+}
+
 export default blogReducer

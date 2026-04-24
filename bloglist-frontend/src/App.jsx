@@ -4,7 +4,11 @@ import loginService from './services/login'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import Toggleable from './components/Toggleable'
-import blogReducer from './reducers/blogReducers'
+import blogReducer, {
+  setBlogs,
+  addBlogAction,
+  updateBlogAction
+} from './reducers/blogReducers'
 
 
 
@@ -23,7 +27,7 @@ const App = () => {
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
-      dispatch({ type: 'SET_BLOGS', payload: blogs })
+      dispatch(setBlogs(blogs))
     )
   }, [])
 
@@ -84,7 +88,7 @@ const App = () => {
     try {
       const returnedBlog = await blogService.create(newBlog)
 
-      dispatch({ type: 'ADD_BLOG', payload: returnedBlog })
+      dispatch(addBlogAction(returnedBlog))
 
       setNotification({
         text: `a new blog ${title} by ${author} added`,
@@ -107,7 +111,7 @@ const App = () => {
   const updateBlog = async (updatedBlog) => {
     const returnedBlog = await blogService.update(updatedBlog.id, updatedBlog)
 
-    dispatch({ type: 'UPDATE_BLOG', payload: returnedBlog })
+    dispatch(updateBlogAction(returnedBlog))
   }
 
   if (user === null) {
