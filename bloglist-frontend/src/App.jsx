@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import Blog from './components/Blog'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -15,12 +16,12 @@ const App = () => {
 
   const [message, setMessage] = useState(null)
 
- 
+  
   useEffect(() => {
     blogService.getAll().then(blogs => setBlogs(blogs))
   }, [])
 
-  
+ 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
@@ -93,7 +94,18 @@ const App = () => {
     }
   }
 
+ 
+  const updateBlog = async (updatedBlog) => {
+    const returnedBlog = await blogService.update(updatedBlog.id, updatedBlog)
 
+    setBlogs(prevBlogs =>
+  prevBlogs.map(blog =>
+    blog.id !== updatedBlog.id ? blog : returnedBlog
+  )
+)
+  }
+
+  
   if (user === null) {
     return (
       <div>
@@ -125,7 +137,7 @@ const App = () => {
     )
   }
 
-  
+ 
   return (
     <div>
       <h2>blogs</h2>
@@ -170,9 +182,11 @@ const App = () => {
       <h3>blogs</h3>
 
       {blogs.map(blog => (
-        <div key={blog.id}>
-          {blog.title} {blog.author}
-        </div>
+        <Blog
+          key={blog.id}
+          blog={blog}
+          updateBlog={updateBlog}   
+        />
       ))}
     </div>
   )
