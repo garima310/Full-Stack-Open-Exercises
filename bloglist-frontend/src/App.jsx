@@ -13,12 +13,14 @@ const App = () => {
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
 
-  
+  const [message, setMessage] = useState(null)
+
+ 
   useEffect(() => {
     blogService.getAll().then(blogs => setBlogs(blogs))
   }, [])
 
-
+  
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
@@ -48,8 +50,13 @@ const App = () => {
 
       setUsername('')
       setPassword('')
+
+      setMessage(`Welcome ${user.name}`)
+      setTimeout(() => setMessage(null), 3000)
+
     } catch (error) {
-      console.log('wrong username or password')
+      setMessage('wrong username or password')
+      setTimeout(() => setMessage(null), 3000)
     }
   }
 
@@ -69,20 +76,30 @@ const App = () => {
       url
     }
 
-    const returnedBlog = await blogService.create(newBlog)
+    try {
+      const returnedBlog = await blogService.create(newBlog)
 
-    setBlogs(blogs.concat(returnedBlog))
+      setBlogs(blogs.concat(returnedBlog))
 
-    setTitle('')
-    setAuthor('')
-    setUrl('')
+      setMessage(`a new blog ${title} by ${author} added`)
+      setTimeout(() => setMessage(null), 3000)
+
+      setTitle('')
+      setAuthor('')
+      setUrl('')
+    } catch (error) {
+      setMessage('failed to add blog')
+      setTimeout(() => setMessage(null), 3000)
+    }
   }
 
-  
+
   if (user === null) {
     return (
       <div>
         <h2>Log in to application</h2>
+
+        {message && <div>{message}</div>}
 
         <form onSubmit={handleLogin}>
           <div>
@@ -108,10 +125,12 @@ const App = () => {
     )
   }
 
- 
+  
   return (
     <div>
       <h2>blogs</h2>
+
+      {message && <div>{message}</div>}
 
       <p>
         {user.name} logged in
