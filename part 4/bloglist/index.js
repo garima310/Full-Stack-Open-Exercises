@@ -36,6 +36,32 @@ app.delete('/api/blogs/:id', async (request, response, next) => {
   })
 })
 
+app.post('/api/users', (request, response) => {
+  const { username, name, password } = request.body
+
+  const user = {
+    username,
+    name,
+    password
+  }
+
+  response.status(201).json(user)
+})
+app.post('/api/login', (request, response) => {
+  const { username, password } = request.body
+
+  if (username === 'admin' && password === '12345') {
+    return response.json({
+      username: 'admin',
+      name: 'Admin User',
+      token: 'fake-token-123'
+    })
+  }
+
+  return response.status(401).json({
+    error: 'invalid username or password'
+  })
+})
 const PORT = 3003
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
