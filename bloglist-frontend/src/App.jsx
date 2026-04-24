@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import Blog from './components/Blog'
+import Notification from './components/Notification'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -16,12 +17,10 @@ const App = () => {
 
   const [notification, setNotification] = useState(null)
 
-  
   useEffect(() => {
     blogService.getAll().then(blogs => setBlogs(blogs))
   }, [])
 
- 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
@@ -66,13 +65,11 @@ const App = () => {
     }
   }
 
- 
   const handleLogout = () => {
     window.localStorage.removeItem('loggedBlogappUser')
     setUser(null)
   }
 
- 
   const addBlog = async (event) => {
     event.preventDefault()
 
@@ -101,7 +98,6 @@ const App = () => {
     }
   }
 
-  
   const updateBlog = async (updatedBlog) => {
     const returnedBlog = await blogService.update(updatedBlog.id, updatedBlog)
 
@@ -112,22 +108,11 @@ const App = () => {
     )
   }
 
-  
   if (user === null) {
     return (
       <div>
         <h2>Log in to application</h2>
-
-        {notification && (
-          <div style={{
-            color: notification.type === 'error' ? 'red' : 'green',
-            border: '1px solid',
-            padding: '5px',
-            marginBottom: '10px'
-          }}>
-            {notification.text}
-          </div>
-        )}
+        <Notification notification={notification} />
 
         <form onSubmit={handleLogin}>
           <div>
@@ -153,21 +138,10 @@ const App = () => {
     )
   }
 
-  
   return (
     <div>
       <h2>blogs</h2>
-
-      {notification && (
-        <div style={{
-          color: notification.type === 'error' ? 'red' : 'green',
-          border: '1px solid',
-          padding: '5px',
-          marginBottom: '10px'
-        }}>
-          {notification.text}
-        </div>
-      )}
+      <Notification notification={notification} />
 
       <p>
         {user.name} logged in
