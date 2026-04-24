@@ -3,6 +3,7 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
+import Toggleable from './components/Toggleable'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -148,35 +149,37 @@ const App = () => {
         <button onClick={handleLogout}>logout</button>
       </p>
 
-      <h3>create new</h3>
+      <Toggleable buttonLabel="new blog">
+  <h3>create new</h3>
 
-      <form onSubmit={addBlog}>
-        <div>
-          title:
-          <input
-            value={title}
-            onChange={({ target }) => setTitle(target.value)}
-          />
-        </div>
+  <form onSubmit={addBlog}>
+    <div>
+      title:
+      <input
+        value={title}
+        onChange={({ target }) => setTitle(target.value)}
+      />
+    </div>
 
-        <div>
-          author:
-          <input
-            value={author}
-            onChange={({ target }) => setAuthor(target.value)}
-          />
-        </div>
+    <div>
+      author:
+      <input
+        value={author}
+        onChange={({ target }) => setAuthor(target.value)}
+      />
+    </div>
 
-        <div>
-          url:
-          <input
-            value={url}
-            onChange={({ target }) => setUrl(target.value)}
-          />
-        </div>
+    <div>
+      url:
+      <input
+        value={url}
+        onChange={({ target }) => setUrl(target.value)}
+      />
+    </div>
 
-        <button type="submit">create</button>
-      </form>
+    <button type="submit">create</button>
+  </form>
+</Toggleable>
 
       <h3>blogs</h3>
 
