@@ -14,7 +14,7 @@ const App = () => {
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
 
-  const [message, setMessage] = useState(null)
+  const [notification, setNotification] = useState(null)
 
   
   useEffect(() => {
@@ -31,7 +31,6 @@ const App = () => {
     }
   }, [])
 
-  
   const handleLogin = async (event) => {
     event.preventDefault()
 
@@ -52,12 +51,18 @@ const App = () => {
       setUsername('')
       setPassword('')
 
-      setMessage(`Welcome ${user.name}`)
-      setTimeout(() => setMessage(null), 3000)
+      setNotification({
+        text: `Welcome ${user.name}`,
+        type: 'success'
+      })
+      setTimeout(() => setNotification(null), 3000)
 
     } catch (error) {
-      setMessage('wrong username or password')
-      setTimeout(() => setMessage(null), 3000)
+      setNotification({
+        text: 'wrong username or password',
+        type: 'error'
+      })
+      setTimeout(() => setNotification(null), 3000)
     }
   }
 
@@ -67,42 +72,44 @@ const App = () => {
     setUser(null)
   }
 
-  
+ 
   const addBlog = async (event) => {
     event.preventDefault()
 
-    const newBlog = {
-      title,
-      author,
-      url
-    }
+    const newBlog = { title, author, url }
 
     try {
       const returnedBlog = await blogService.create(newBlog)
 
       setBlogs(blogs.concat(returnedBlog))
 
-      setMessage(`a new blog ${title} by ${author} added`)
-      setTimeout(() => setMessage(null), 3000)
+      setNotification({
+        text: `a new blog ${title} by ${author} added`,
+        type: 'success'
+      })
+      setTimeout(() => setNotification(null), 3000)
 
       setTitle('')
       setAuthor('')
       setUrl('')
     } catch (error) {
-      setMessage('failed to add blog')
-      setTimeout(() => setMessage(null), 3000)
+      setNotification({
+        text: 'failed to add blog',
+        type: 'error'
+      })
+      setTimeout(() => setNotification(null), 3000)
     }
   }
 
- 
+  
   const updateBlog = async (updatedBlog) => {
     const returnedBlog = await blogService.update(updatedBlog.id, updatedBlog)
 
     setBlogs(prevBlogs =>
-  prevBlogs.map(blog =>
-    blog.id !== updatedBlog.id ? blog : returnedBlog
-  )
-)
+      prevBlogs.map(blog =>
+        blog.id !== updatedBlog.id ? blog : returnedBlog
+      )
+    )
   }
 
   
@@ -111,7 +118,16 @@ const App = () => {
       <div>
         <h2>Log in to application</h2>
 
-        {message && <div>{message}</div>}
+        {notification && (
+          <div style={{
+            color: notification.type === 'error' ? 'red' : 'green',
+            border: '1px solid',
+            padding: '5px',
+            marginBottom: '10px'
+          }}>
+            {notification.text}
+          </div>
+        )}
 
         <form onSubmit={handleLogin}>
           <div>
@@ -137,12 +153,21 @@ const App = () => {
     )
   }
 
- 
+  
   return (
     <div>
       <h2>blogs</h2>
 
-      {message && <div>{message}</div>}
+      {notification && (
+        <div style={{
+          color: notification.type === 'error' ? 'red' : 'green',
+          border: '1px solid',
+          padding: '5px',
+          marginBottom: '10px'
+        }}>
+          {notification.text}
+        </div>
+      )}
 
       <p>
         {user.name} logged in
@@ -182,15 +207,15 @@ const App = () => {
       <h3>blogs</h3>
 
       {blogs
-  .sort((a, b) => b.likes - a.likes)
-  .map(blog => (
-        <Blog
-          key={blog.id}
-          blog={blog}
-          updateBlog={updateBlog} 
-          user={user}  
-        />
-      ))}
+        .sort((a, b) => b.likes - a.likes)
+        .map(blog => (
+          <Blog
+            key={blog.id}
+            blog={blog}
+            updateBlog={updateBlog}
+            user={user}
+          />
+        ))}
     </div>
   )
 }
