@@ -1,12 +1,27 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useReducer } from 'react'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import Toggleable from './components/Toggleable'
 
+const blogReducer = (state, action) => {
+  switch (action.type) {
+    case 'SET_BLOGS':
+      return action.payload
+    case 'ADD_BLOG':
+      return state.concat(action.payload)
+    case 'UPDATE_BLOG':
+      return state.map(blog =>
+        blog.id !== action.payload.id ? blog : action.payload
+      )
+    default:
+      return state
+  }
+}
+
 const App = () => {
-  const [blogs, setBlogs] = useState([])
+  const [blogs, dispatch] = useReducer(blogReducer, [])
   const [user, setUser] = useState(null)
 
   const [username, setUsername] = useState('')
@@ -19,7 +34,9 @@ const App = () => {
   const [notification, setNotification] = useState(null)
 
   useEffect(() => {
-    blogService.getAll().then(blogs => setBlogs(blogs))
+    blogService.getAll().then(blogs =>
+      dispatch({ type: 'SET_BLOGS', payload: blogs })
+    )
   }, [])
 
   useEffect(() => {
@@ -79,7 +96,7 @@ const App = () => {
     try {
       const returnedBlog = await blogService.create(newBlog)
 
-      setBlogs(blogs.concat(returnedBlog))
+      dispatch({ type: 'ADD_BLOG', payload: returnedBlog })
 
       setNotification({
         text: `a new blog ${title} by ${author} added`,
@@ -102,11 +119,7 @@ const App = () => {
   const updateBlog = async (updatedBlog) => {
     const returnedBlog = await blogService.update(updatedBlog.id, updatedBlog)
 
-    setBlogs(prevBlogs =>
-      prevBlogs.map(blog =>
-        blog.id !== updatedBlog.id ? blog : returnedBlog
-      )
-    )
+    dispatch({ type: 'UPDATE_BLOG', payload: returnedBlog })
   }
 
   if (user === null) {
@@ -150,36 +163,36 @@ const App = () => {
       </p>
 
       <Toggleable buttonLabel="new blog">
-  <h3>create new</h3>
+        <h3>create new</h3>
 
-  <form onSubmit={addBlog}>
-    <div>
-      title:
-      <input
-        value={title}
-        onChange={({ target }) => setTitle(target.value)}
-      />
-    </div>
+        <form onSubmit={addBlog}>
+          <div>
+            title:
+            <input
+              value={title}
+              onChange={({ target }) => setTitle(target.value)}
+            />
+          </div>
 
-    <div>
-      author:
-      <input
-        value={author}
-        onChange={({ target }) => setAuthor(target.value)}
-      />
-    </div>
+          <div>
+            author:
+            <input
+              value={author}
+              onChange={({ target }) => setAuthor(target.value)}
+            />
+          </div>
 
-    <div>
-      url:
-      <input
-        value={url}
-        onChange={({ target }) => setUrl(target.value)}
-      />
-    </div>
+          <div>
+            url:
+            <input
+              value={url}
+              onChange={({ target }) => setUrl(target.value)}
+            />
+          </div>
 
-    <button type="submit">create</button>
-  </form>
-</Toggleable>
+          <button type="submit">create</button>
+        </form>
+      </Toggleable>
 
       <h3>blogs</h3>
 
